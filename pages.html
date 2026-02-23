@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VSC ADMIN</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Sarabun', sans-serif; background: #f3f4f6; color: #1f2937; min-height: 100vh; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+  /* Card */
+  .card { background: #fff; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); border: 1px solid #f0f0f0; padding: 1.5rem; }
+
+  /* Header */
+  .header { display: flex; align-items: center; justify-content: space-between; }
+  .header-left { display: flex; align-items: center; gap: 1rem; }
+  .header-icon { background: #dcfce7; padding: .75rem; border-radius: .75rem; display: flex; }
+  .header-icon svg { width: 2rem; height: 2rem; color: #16a34a; }
+  h1 { font-size: 1.5rem; font-weight: 700; }
+  .subtitle { color: #6b7280; font-size: .875rem; }
+  .btn-reset { display: flex; align-items: center; gap: .5rem; padding: .5rem 1rem; background: #fef2f2; color: #dc2626; border: none; border-radius: .5rem; cursor: pointer; font-size: .875rem; font-weight: 500; font-family: inherit; }
+  .btn-reset:hover { background: #fee2e2; }
+
+  /* Grid layout */
+  .grid-main { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+  @media(min-width:1024px){ .grid-main { grid-template-columns: 7fr 5fr; } }
+
+  .left-col, .right-col { display: flex; flex-direction: column; gap: 1.5rem; }
+  @media(min-width:1024px){ .right-col { position: sticky; top: 1.5rem; align-self: start; } }
+
+  /* Section headings */
+  .section-title { font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: .5rem; margin-bottom: 1rem; }
+  .icon-blue { color: #3b82f6; } .icon-green { color: #16a34a; } .icon-purple { color: #9333ea; } .icon-teal { color: #0d9488; } .icon-orange { color: #ea580c; }
+
+  /* Form Controls */
+  label { display: block; font-size: .875rem; font-weight: 500; color: #374151; margin-bottom: .25rem; }
+  input, select, textarea {
+    width: 100%; border: 1px solid #e5e7eb; border-radius: .5rem; padding: .625rem .75rem;
+    font-size: .875rem; font-family: inherit; outline: none; transition: box-shadow .15s;
+  }
+  input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px #3b82f6; border-color: transparent; }
+  input.focus-green:focus, select.focus-green:focus { box-shadow: 0 0 0 2px #16a34a; }
+  input.focus-purple:focus, select.focus-purple:focus { box-shadow: 0 0 0 2px #9333ea; }
+  input.focus-orange:focus, select.focus-orange:focus { box-shadow: 0 0 0 2px #ea580c; }
+  input.focus-teal:focus { box-shadow: 0 0 0 2px #0d9488; }
+  .bg-purple-50 { background: #faf5ff; }
+  .bg-orange-50 { background: #fff7ed; }
+  .bg-gray-50 { background: #f9fafb; }
+  textarea { resize: none; }
+
+  .form-group { margin-bottom: 1rem; }
+  .form-group:last-child { margin-bottom: 0; }
+
+  /* Toggle tabs */
+  .tab-group { display: flex; background: #f3f4f6; padding: .25rem; border-radius: .5rem; margin-bottom: 1rem; }
+  .tab-btn { flex: 1; padding: .5rem; font-size: .875rem; font-weight: 500; border: none; background: transparent; border-radius: .375rem; cursor: pointer; font-family: inherit; color: #6b7280; transition: all .15s; }
+  .tab-btn.active { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.1); color: #111827; }
+
+  /* Grid 2-col */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .75rem; }
+
+  /* Custom size panel */
+  .custom-panel { padding: 1rem; background: #fff7ed; border: 1px solid #fed7aa; border-radius: .75rem; }
+  .custom-panel .text-xs { font-size: .75rem; color: #4b5563; margin-bottom: .25rem; }
+  .input-group { display: flex; }
+  .input-group input { border-right: none; border-radius: .5rem 0 0 .5rem; }
+  .input-group select { border-radius: 0 .5rem .5rem 0; background: #fff; width: auto; }
+
+  /* Checkbox row */
+  .check-row { display: flex; align-items: center; gap: .75rem; padding: .75rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: .5rem; }
+  .check-row input[type=checkbox] { width: 1.25rem; height: 1.25rem; cursor: pointer; accent-color: #16a34a; }
+  .check-row label { font-size: .875rem; cursor: pointer; margin-bottom: 0; }
+
+  /* Shipping row */
+  .shipping-row { display: flex; gap: .5rem; align-items: flex-start; }
+  .shipping-row select { flex: 1; }
+  #shippingCostInput { width: 6rem; }
+
+  /* Add to cart button */
+  .btn-add { width: 100%; display: flex; align-items: center; justify-content: center; gap: .5rem; padding: .75rem 1rem; background: #16a34a; color: #fff; border: none; border-radius: .75rem; font-size: .9375rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: background .15s; }
+  .btn-add:hover { background: #15803d; }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid #f3f4f6; margin: 1rem 0; }
+
+  /* Cart items */
+  .cart-empty { text-align: center; padding: 1.5rem; background: #f9fafb; border-radius: .75rem; border: 1.5px dashed #d1d5db; color: #9ca3af; font-size: .875rem; }
+  .cart-list { display: flex; flex-direction: column; gap: .75rem; }
+  .cart-item { display: flex; justify-content: space-between; align-items: flex-start; padding: .75rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: .75rem; gap: .5rem; }
+  .cart-item-info { flex: 1; }
+  .cart-item-name { font-weight: 600; font-size: .875rem; color: #111827; }
+  .cart-item-size { font-size: .75rem; color: #6b7280; margin-top: .25rem; white-space: pre-wrap; }
+  .cart-item-price { font-size: .875rem; color: #2563eb; font-weight: 500; margin-top: .5rem; }
+  .text-red { color: #ef4444; }
+  .text-orange { color: #ea580c; }
+  .btn-remove { background: transparent; border: none; cursor: pointer; padding: .5rem; border-radius: .5rem; color: #f87171; transition: all .15s; flex-shrink: 0; }
+  .btn-remove:hover { background: #fef2f2; color: #dc2626; }
+
+  /* Note helper */
+  .helper { font-size: .75rem; color: #6b7280; margin-top: .5rem; }
+  .helper-warning { font-size: .75rem; color: #f97316; margin-top: .25rem; }
+  .helper-red { font-size: .75rem; color: #ef4444; margin-top: .25rem; }
+
+  /* Remark row */
+  .remark-row { display: flex; align-items: center; gap: .5rem; }
+  .remark-label { font-size: .875rem; font-weight: 500; width: 5rem; flex-shrink: 0; color: #374151; }
+  .btn-add-remark { display: flex; align-items: center; gap: .25rem; background: transparent; border: none; cursor: pointer; font-size: .875rem; font-weight: 500; color: #0d9488; font-family: inherit; margin-top: 1rem; }
+  .btn-add-remark:hover { color: #0f766e; }
+
+  /* VAT checkbox */
+  .vat-row { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: .5rem; }
+  .vat-row input[type=checkbox] { width: 1.25rem; height: 1.25rem; cursor: pointer; accent-color: #9333ea; margin-top: 2px; }
+  .vat-row label { font-size: .875rem; cursor: pointer; margin-bottom: 0; }
+
+  /* Preview */
+  .preview-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #f3f4f6; }
+  .preview-title { font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: .5rem; }
+  .btn-copy { display: flex; align-items: center; gap: .5rem; padding: .5rem 1rem; background: #2563eb; color: #fff; border: none; border-radius: .5rem; cursor: pointer; font-size: .875rem; font-weight: 500; font-family: inherit; transition: background .15s; }
+  .btn-copy:hover { background: #1d4ed8; }
+  .btn-copy.copied { background: #16a34a; }
+  .preview-box { background: #f9fafb; padding: 1rem; border-radius: .75rem; border: 1px solid #e5e7eb; white-space: pre-wrap; font-family: monospace; font-size: .8125rem; line-height: 1.6; color: #1f2937; height: 25rem; overflow-y: auto; }
+  .summary-box { margin-top: 1rem; padding: 1rem; background: #eff6ff; border-radius: .75rem; border: 1px solid #bfdbfe; }
+  .summary-title { font-size: .875rem; font-weight: 700; color: #1e40af; margin-bottom: .5rem; }
+  .summary-row { display: flex; justify-content: space-between; font-size: .875rem; color: #1e3a8a; padding: .15rem 0; }
+  .summary-row.discount { color: #dc2626; }
+  .summary-row.shipping-col { color: #ea580c; }
+  .summary-row.purple-col { color: #7c3aed; }
+  .summary-row.total { font-weight: 700; border-top: 1px solid #bfdbfe; margin-top: .35rem; padding-top: .35rem; }
+
+  /* Relative wrapper for % icon */
+  .input-suffix { position: relative; }
+  .input-suffix input { padding-right: 2rem; }
+  .suffix-icon { position: absolute; right: .75rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: .875rem; pointer-events: none; }
+
+  /* icon inline */
+  svg.icon { width: 1.25rem; height: 1.25rem; display: inline-block; vertical-align: middle; }
+  svg.icon-sm { width: 1rem; height: 1rem; display: inline-block; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="card header">
+    <div class="header-left">
+      <div class="header-icon">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+      </div>
+      <div>
+        <h1>VSC ADMIN</h1>
+        <div class="subtitle">By.Teeranan</div>
+      </div>
+    </div>
+    <button class="btn-reset" onclick="handleReset()">
+      <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+      เริ่มบิลใหม่
+    </button>
+  </div>
+
+  <!-- Main grid -->
+  <div class="grid-main">
+
+    <!-- LEFT COLUMN -->
+    <div class="left-col">
+
+      <!-- 1. Customer Info -->
+      <div class="card">
+        <div class="section-title">
+          <svg class="icon icon-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          ข้อมูลลูกค้า
+        </div>
+        <textarea id="customerInfo" class="focus-blue" rows="3" placeholder="ชื่อ ที่อยู่ เบอร์โทรศัพท์..."></textarea>
+      </div>
+
+      <!-- 2. Product Details -->
+      <div class="card">
+        <div class="section-title">
+          <svg class="icon icon-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+          รายละเอียดสินค้า
+        </div>
+
+        <div class="form-group">
+          <label>ประเภทสินค้า</label>
+          <select id="productType" class="focus-green" onchange="onProductChange()"></select>
+        </div>
+
+        <div class="form-group" id="formulaGroup" style="display:none">
+          <label>สูตร / ชนิด / สี</label>
+          <select id="formula" class="focus-green" onchange="onFormulaChange()"></select>
+        </div>
+
+        <!-- Input Type Toggle -->
+        <div class="tab-group">
+          <button class="tab-btn active" id="tab-catalog" onclick="setInputType('catalog')">เลือกจากมาตรฐาน</button>
+          <button class="tab-btn" id="tab-custom" onclick="setInputType('custom')">ระบุขนาดพิเศษเอง</button>
+        </div>
+
+        <!-- Catalog size select -->
+        <div id="catalogPanel" class="form-group">
+          <label>ขนาด</label>
+          <select id="sizeSelect" class="focus-green" onchange="onSizeChange()"></select>
+        </div>
+
+        <!-- Custom size panel -->
+        <div id="customPanel" class="form-group" style="display:none">
+          <div class="custom-panel grid-3">
+            <div>
+              <div class="text-xs" id="wLabel">กว้าง (เมตร)</div>
+              <input type="number" id="customW" class="focus-orange" placeholder="0" />
+            </div>
+            <div>
+              <div class="text-xs" id="lLabel">ยาว (เมตร)</div>
+              <input type="number" id="customL" class="focus-orange" placeholder="0" />
+            </div>
+            <div>
+              <div class="text-xs">หนา</div>
+              <div class="input-group">
+                <input type="number" id="customT" class="focus-orange" placeholder="0" />
+                <select id="customTUnit" style="width:5rem">
+                  <option value="ไมครอน">ไมครอน</option>
+                  <option value="มม">มม</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hole punch option -->
+        <div class="form-group" id="holePunchGroup" style="display:none">
+          <div class="check-row">
+            <input type="checkbox" id="isPunched" onchange="render()" />
+            <label for="isPunched" id="holePunchLabel">ต้องการเจาะรู</label>
+          </div>
+        </div>
+
+        <!-- Qty & Unit Price -->
+        <div class="grid-2 form-group">
+          <div>
+            <label id="qtyLabel">จำนวน (ม้วน)</label>
+            <input type="number" id="quantity" class="bg-gray-50 focus-green" min="1" value="1" oninput="render()" onfocus="this.select()" />
+            <div id="bagWarning" class="helper-red" style="display:none">*ขั้นต่ำ 300 ใบ</div>
+          </div>
+          <div>
+            <label>ราคาต่อหน่วย (บาท)</label>
+            <input type="number" id="unitPrice" value="0" oninput="render()" />
+            <div id="hdpeWarning" class="helper-warning" style="display:none">*กรุณาระบุราคาเอง</div>
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <!-- Per-item discount & shipping -->
+        <div class="grid-2 form-group">
+          <div>
+            <label>ส่วนลดรายการนี้ (%)</label>
+            <div class="input-suffix">
+              <input type="number" id="itemDiscountPct" class="bg-purple-50 focus-purple" min="0" max="100" value="0" oninput="render()" />
+              <span class="suffix-icon">%</span>
+            </div>
+          </div>
+          <div>
+            <label>ค่าจัดส่งรายการนี้</label>
+            <div class="shipping-row">
+              <select id="shippingType" class="bg-orange-50 focus-orange" onchange="onShippingTypeChange()">
+                <option value="ปลายทาง">เก็บปลายทาง</option>
+                <option value="ฟรี">ส่งฟรี</option>
+                <option value="ระบุ">ระบุค่าส่ง (บาท)</option>
+              </select>
+              <input type="number" id="shippingCostInput" class="bg-orange-50 focus-orange" placeholder="บาท" style="display:none" oninput="render()" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Add to Cart -->
+        <hr class="divider" />
+        <button class="btn-add" onclick="handleAddToCart()">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          เพิ่มลงรายการสั่งซื้อ
+        </button>
+      </div>
+
+      <!-- 2.5 Cart -->
+      <div class="card">
+        <div class="section-title">
+          <svg class="icon icon-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.95 1.61h9.72a2 2 0 001.95-1.61L23 6H6"/></svg>
+          รายการที่เลือก (<span id="cartCount">0</span>)
+        </div>
+        <div id="cartContainer"><div class="cart-empty">ยังไม่มีสินค้าในรายการ</div></div>
+      </div>
+
+      <!-- 3. Global Discount & VAT -->
+      <div class="card">
+        <div class="section-title">
+          <svg class="icon icon-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          ส่วนลดพิเศษ & ภาษี (ท้ายบิล)
+        </div>
+        <div class="grid-2 form-group">
+          <div>
+            <label>ส่วนลดรวม (%)</label>
+            <div class="input-suffix">
+              <input type="number" id="globalDiscountPct" class="focus-purple" min="0" max="100" placeholder="ระบุ %" oninput="render()" />
+              <span class="suffix-icon">%</span>
+            </div>
+          </div>
+          <div>
+            <label>ส่วนลดพิเศษ (บาท)</label>
+            <input type="number" id="globalDiscountBaht" class="focus-purple" min="0" placeholder="ระบุเป็นบาท" oninput="render()" />
+          </div>
+        </div>
+        <p class="helper">*ส่วนลดแบบ % จะคำนวณจากยอดสินค้าก่อนรวมค่าส่ง หากไม่ระบุจะไม่แสดงในพรีวิว</p>
+
+        <hr class="divider" />
+        <div class="vat-row">
+          <input type="checkbox" id="addVat" onchange="render()" />
+          <label for="addVat">ราคานี้ยังไม่รวม VAT (ต้องการบวก VAT 7% เพิ่มในบิล)</label>
+        </div>
+        <p class="helper" style="margin-top:.5rem">*ค่าเริ่มต้นคือ "รวม VAT แล้ว" แต่หากติ๊กช่องนี้ ระบบจะคำนวณ +7% จากยอดสินค้าหลังหักส่วนลด</p>
+      </div>
+
+      <!-- 4. Remarks -->
+      <div class="card">
+        <div class="section-title">
+          <svg class="icon icon-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          หมายเหตุ (Remark)
+        </div>
+        <div id="remarksList" class="form-group" style="display:flex;flex-direction:column;gap:.75rem;"></div>
+        <button class="btn-add-remark" onclick="handleAddRemark()">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          เพิ่ม Remark
+        </button>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+      <div class="card">
+        <div class="preview-header">
+          <div class="preview-title">
+            <svg class="icon" style="color:#22c55e" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            พรีวิวข้อความสรุป
+          </div>
+          <button class="btn-copy" id="copyBtn" onclick="handleCopy()">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            คัดลอกข้อความ
+          </button>
+        </div>
+
+        <div class="preview-box" id="previewBox"></div>
+
+        <!-- Summary numbers -->
+        <div class="summary-box">
+          <div class="summary-title">สรุปตัวเลข (สำหรับแอดมิน)</div>
+          <div id="summaryNumbers"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const PRODUCTS = {
+  GHF: {
+    id: 'GHF', name: 'พลาสติกคลุมโรงเรือน (GHF)', unit: 'ม้วน', hasFormulas: true,
+    formulas: {
+      'สูตรมาตรฐาน': [
+        { label: '2m x 100m x 200mc', w:2,l:100,t:200,tUnit:'ไมครอน',price:4580 },
+        { label: '2m x 120m x 200mc', w:2,l:120,t:200,tUnit:'ไมครอน',price:5460 },
+        { label: '2m x 125m x 300mc', w:2,l:125,t:300,tUnit:'ไมครอน',price:8540 },
+        { label: '2.5m x 100m x 100mc', w:2.5,l:100,t:100,tUnit:'ไมครอน',price:2600 },
+        { label: '3m x 100m x 100mc', w:3,l:100,t:100,tUnit:'ไมครอน',price:3120 },
+        { label: '3m x 100m x 150mc', w:3,l:100,t:150,tUnit:'ไมครอน',price:4690 },
+        { label: '3m x 100m x 200mc', w:3,l:100,t:200,tUnit:'ไมครอน',price:6830 },
+        { label: '3.2m x 100m x 100mc', w:3.2,l:100,t:100,tUnit:'ไมครอน',price:3340 },
+        { label: '3.2m x 100m x 150mc', w:3.2,l:100,t:150,tUnit:'ไมครอน',price:4990 },
+        { label: '3.5m x 100m x 100mc', w:3.5,l:100,t:100,tUnit:'ไมครอน',price:3640 },
+        { label: '3.5m x 100m x 150mc', w:3.5,l:100,t:150,tUnit:'ไมครอน',price:5470 },
+        { label: '4m x 100m x 100mc', w:4,l:100,t:100,tUnit:'ไมครอน',price:4170 },
+        { label: '4m x 100m x 150mc', w:4,l:100,t:150,tUnit:'ไมครอน',price:6250 },
+        { label: '4m x 100m x 200mc', w:4,l:100,t:200,tUnit:'ไมครอน',price:9130 },
+        { label: '5m x 100m x 150mc', w:5,l:100,t:150,tUnit:'ไมครอน',price:7850 },
+        { label: '5m x 100m x 200mc', w:5,l:100,t:200,tUnit:'ไมครอน',price:11480 },
+        { label: '6m x 100m x 100mc', w:6,l:100,t:100,tUnit:'ไมครอน',price:6560 },
+        { label: '6m x 100m x 150mc', w:6,l:100,t:150,tUnit:'ไมครอน',price:10340 },
+        { label: '6m x 100m x 200mc', w:6,l:100,t:200,tUnit:'ไมครอน',price:13740 },
+        { label: '7m x 100m x 200mc', w:7,l:100,t:200,tUnit:'ไมครอน',price:20970 },
+        { label: '7.5m x 52m x 150mc', w:7.5,l:52,t:150,tUnit:'ไมครอน',price:9430 },
+      ],
+      'สูตรกระจายแสง + ลดความร้อน': [
+        { label: '3.5m x 100m x 200mc', w:3.5,l:100,t:200,tUnit:'ไมครอน',price:9890 },
+        { label: '4m x 100m x 150mc', w:4,l:100,t:150,tUnit:'ไมครอน',price:8330 },
+        { label: '4m x 100m x 200mc', w:4,l:100,t:200,tUnit:'ไมครอน',price:11120 },
+        { label: '5m x 100m x 200mc', w:5,l:100,t:200,tUnit:'ไมครอน',price:13980 },
+        { label: '6m x 100m x 150mc', w:6,l:100,t:150,tUnit:'ไมครอน',price:12950 },
+        { label: '6m x 100m x 200mc', w:6,l:100,t:200,tUnit:'ไมครอน',price:17200 },
+        { label: '7m x 50m x 200mc', w:7,l:50,t:200,tUnit:'ไมครอน',price:11900 },
+        { label: '12m x 42m x 200mc', w:12,l:42,t:200,tUnit:'ไมครอน',price:20030 },
+        { label: '14m x 50m x 200mc', w:14,l:50,t:200,tUnit:'ไมครอน',price:27840 },
+      ],
+      'สูตรคัดเลือกแสง': [
+        { label: '6m x 100m x 150mc', w:6,l:100,t:150,tUnit:'ไมครอน',price:11240 },
+        { label: '7m x 100m x 200mc', w:7,l:100,t:200,tUnit:'ไมครอน',price:21480 },
+      ],
+      'สูตรกระจายแสง (+กันหยดน้ำ)': [
+        { label: '8m x 62m x 150mc', w:8,l:62,t:150,tUnit:'ไมครอน',price:14150 },
+        { label: '8m x 62m x 200mc', w:8,l:62,t:200,tUnit:'ไมครอน',price:18900 },
+        { label: '10m x 50m x 200mc', w:10,l:50,t:200,tUnit:'ไมครอน',price:19160 },
+        { label: '12m x 42m x 200m(c)', w:12,l:42,t:200,tUnit:'ไมครอน',price:19380 },
+        { label: '13m x 50m x 250mc', w:13,l:50,t:250,tUnit:'ไมครอน',price:30290 },
+      ]
+    }
+  },
+  CTF: {
+    id: 'CTF', name: 'พลาสติกปูพื้นก่อสร้าง (CTF)', unit: 'ม้วน', hasFormulas: true,
+    formulas: {
+      'สีดำ': [
+        { label: '3.6m x 36m x 80mc', w:3.6,l:36,t:80,tUnit:'ไมครอน',price:750 },
+        { label: '3.6m x 36m x 100mc', w:3.6,l:36,t:100,tUnit:'ไมครอน',price:1020 },
+        { label: '3.6m x 36m x 120mc', w:3.6,l:36,t:120,tUnit:'ไมครอน',price:1280 },
+        { label: '3.6m x 36m x 150mc', w:3.6,l:36,t:150,tUnit:'ไมครอน',price:1550 },
+      ],
+      'สีใส': [
+        { label: '3.6m x 36m x 80mc', w:3.6,l:36,t:80,tUnit:'ไมครอน',price:800 },
+        { label: '3.6m x 36m x 100mc', w:3.6,l:36,t:100,tUnit:'ไมครอน',price:1080 },
+        { label: '3.6m x 36m x 120mc', w:3.6,l:36,t:120,tUnit:'ไมครอน',price:1350 },
+        { label: '3.6m x 36m x 150mc', w:3.6,l:36,t:150,tUnit:'ไมครอน',price:1650 },
+      ],
+    }
+  },
+  PLF: {
+    id: 'PLF', name: 'พลาสติกปูบ่อ (PLF)', unit: 'ม้วน', hasFormulas: false,
+    sizes: [
+      { label: '6M x 100M x 150 ไมครอน', w:6,l:100,t:150,tUnit:'ไมครอน',price:7700 },
+      { label: '6M x 100M x 200 ไมครอน', w:6,l:100,t:200,tUnit:'ไมครอน',price:10450 },
+      { label: '4M x 100M x 300 ไมครอน', w:4,l:100,t:300,tUnit:'ไมครอน',price:10450 },
+      { label: '6M x 100M x 300 ไมครอน', w:6,l:100,t:300,tUnit:'ไมครอน',price:15400 },
+      { label: '4M x 100M x 500 ไมครอน', w:4,l:100,t:500,tUnit:'ไมครอน',price:17450 },
+    ]
+  },
+  HDPE: {
+    id: 'HDPE', name: 'แผ่นพลาสติกปูบ่อแบบหนา (HDPE)', unit: 'ม้วน', hasFormulas: false,
+    sizes: [
+      { label: '7.1M x 200M x 0.30 มม', w:7.1,l:200,t:0.30,tUnit:'มม',price:0 },
+      { label: '7M x 280M x 0.50 มม', w:7,l:280,t:0.50,tUnit:'มม',price:0 },
+      { label: '7M x 280M x 0.75 มม', w:7,l:280,t:0.75,tUnit:'มม',price:0 },
+      { label: '7M x 210M x 1.00 มม', w:7,l:210,t:1.00,tUnit:'มม',price:0 },
+      { label: '7M x 140M x 1.50 มม', w:7,l:140,t:1.50,tUnit:'มม',price:0 },
+      { label: '7M x 105M x 2.00 มม', w:7,l:105,t:2.00,tUnit:'มม',price:0 },
+    ]
+  },
+  MUF: {
+    id: 'MUF', name: 'พลาสติกคลุมแปลงปลูก (MUF)', unit: 'ม้วน', hasFormulas: false, hasHoleOption: true, holePunchPrice: 80,
+    sizes: [
+      { label: '0.80M x 400M x 25 ไมครอน', w:0.80,l:400,t:25,tUnit:'ไมครอน',price:620 },
+      { label: '1.00M x 400M x 25 ไมครอน', w:1.00,l:400,t:25,tUnit:'ไมครอน',price:760 },
+      { label: '1.20M x 400M x 25 ไมครอน', w:1.20,l:400,t:25,tUnit:'ไมครอน',price:880 },
+      { label: '1.50M x 400M x 25 ไมครอน', w:1.50,l:400,t:25,tUnit:'ไมครอน',price:1100 },
+    ]
+  },
+  BAG: {
+    id: 'BAG', name: 'ถุงเพาะชำ ขาว-ดำ (Grow Bag)', unit: 'ใบ', hasFormulas: false, hasHoleOption: true, holePunchPrice: 0,
+    sizes: [
+      { label: '7นิ้ว x 13นิ้ว x 80 ไมครอน', w:7,wUnit:'นิ้ว',l:13,lUnit:'นิ้ว',t:80,tUnit:'ไมครอน',price:2.24 },
+    ]
+  },
+  NSBW: {
+    id: 'NSBW', name: 'พลาสติกสำหรับอนุบาลสัตว์น้ำ (NSBW)', unit: 'ม้วน', hasFormulas: false,
+    sizes: [
+      { label: '6M x 100M x 300 ไมครอน', w:6,l:100,t:300,tUnit:'ไมครอน',price:24370 },
+      { label: '13M x 50M x 250 ไมครอน', w:13,l:50,t:250,tUnit:'ไมครอน',price:27220 },
+      { label: '13M x 60M x 250 ไมครอน', w:13,l:60,t:250,tUnit:'ไมครอน',price:33140 },
+    ]
+  }
+};
+
+// ===== STATE =====
+let state = {
+  productType: 'GHF',
+  formula: 'สูตรมาตรฐาน',
+  inputType: 'catalog',
+  selectedSizeIdx: 0,
+  unitPrice: 0,
+  quantity: 1,
+  isPunched: false,
+  itemDiscountPct: 0,
+  shippingType: 'ปลายทาง',
+  shippingCostInput: '',
+  globalDiscountPct: '',
+  globalDiscountBaht: '',
+  isVatAdded: false,
+  remarks: [''],
+  cart: [],
+};
+
+// ===== HELPERS =====
+function currentProduct() { return PRODUCTS[state.productType]; }
+function availableSizes() {
+  const p = currentProduct();
+  if (p.hasFormulas) return p.formulas[state.formula] || [];
+  return p.sizes || [];
+}
+function formatCurrency(val) {
+  if (Number.isInteger(val)) return val.toLocaleString('th-TH');
+  return val.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ===== INIT =====
+function init() {
+  // Populate product dropdown
+  const ptSel = document.getElementById('productType');
+  Object.values(PRODUCTS).forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id; opt.textContent = p.name;
+    ptSel.appendChild(opt);
+  });
+  renderRemarks();
+  updateFormulasDropdown();
+  updateSizeDropdown();
+  render();
+}
+
+function onProductChange() {
+  state.productType = document.getElementById('productType').value;
+  const p = currentProduct();
+  if (p.hasFormulas) {
+    const keys = Object.keys(p.formulas);
+    state.formula = keys[0];
+  }
+  state.selectedSizeIdx = 0;
+  state.isPunched = false;
+  state.quantity = state.productType === 'BAG' ? 300 : 1;
+  document.getElementById('quantity').value = state.quantity;
+  document.getElementById('isPunched').checked = false;
+  updateFormulasDropdown();
+  updateSizeDropdown();
+  render();
+}
+
+function onFormulaChange() {
+  state.formula = document.getElementById('formula').value;
+  state.selectedSizeIdx = 0;
+  updateSizeDropdown();
+  render();
+}
+
+function onSizeChange() {
+  state.selectedSizeIdx = Number(document.getElementById('sizeSelect').value);
+  const sizes = availableSizes();
+  if (sizes[state.selectedSizeIdx]) {
+    state.unitPrice = sizes[state.selectedSizeIdx].price;
+    document.getElementById('unitPrice').value = state.unitPrice;
+  }
+  render();
+}
+
+function setInputType(type) {
+  state.inputType = type;
+  document.getElementById('catalogPanel').style.display = type === 'catalog' ? '' : 'none';
+  document.getElementById('customPanel').style.display = type === 'custom' ? '' : 'none';
+  document.getElementById('tab-catalog').classList.toggle('active', type === 'catalog');
+  document.getElementById('tab-custom').classList.toggle('active', type === 'custom');
+  if (type === 'catalog') {
+    const sizes = availableSizes();
+    if (sizes[state.selectedSizeIdx]) {
+      state.unitPrice = sizes[state.selectedSizeIdx].price;
+      document.getElementById('unitPrice').value = state.unitPrice;
+    }
+  }
+  render();
+}
+
+function onShippingTypeChange() {
+  state.shippingType = document.getElementById('shippingType').value;
+  document.getElementById('shippingCostInput').style.display = state.shippingType === 'ระบุ' ? '' : 'none';
+  render();
+}
+
+function updateFormulasDropdown() {
+  const p = currentProduct();
+  const grp = document.getElementById('formulaGroup');
+  if (p.hasFormulas) {
+    grp.style.display = '';
+    const sel = document.getElementById('formula');
+    sel.innerHTML = '';
+    Object.keys(p.formulas).forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f; opt.textContent = f;
+      if (f === state.formula) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    if (!p.formulas[state.formula]) {
+      state.formula = Object.keys(p.formulas)[0];
+      sel.value = state.formula;
+    }
+  } else {
+    grp.style.display = 'none';
+  }
+}
+
+function updateSizeDropdown() {
+  const sizes = availableSizes();
+  const sel = document.getElementById('sizeSelect');
+  sel.innerHTML = '';
+  sizes.forEach((s, i) => {
+    const opt = document.createElement('option');
+    opt.value = i; opt.textContent = s.label;
+    sel.appendChild(opt);
+  });
+  if (state.selectedSizeIdx >= sizes.length) state.selectedSizeIdx = 0;
+  sel.value = state.selectedSizeIdx;
+  if (sizes[state.selectedSizeIdx] && state.inputType === 'catalog') {
+    state.unitPrice = sizes[state.selectedSizeIdx].price;
+    document.getElementById('unitPrice').value = state.unitPrice;
+  }
+}
+
+// ===== RENDER =====
+function render() {
+  const p = currentProduct();
+  // Sync state from inputs
+  state.quantity = Number(document.getElementById('quantity').value) || 1;
+  state.unitPrice = Number(document.getElementById('unitPrice').value) || 0;
+  state.isPunched = document.getElementById('isPunched').checked;
+  state.itemDiscountPct = Number(document.getElementById('itemDiscountPct').value) || 0;
+  state.shippingType = document.getElementById('shippingType').value;
+  state.shippingCostInput = document.getElementById('shippingCostInput').value;
+  state.globalDiscountPct = document.getElementById('globalDiscountPct').value;
+  state.globalDiscountBaht = document.getElementById('globalDiscountBaht').value;
+  state.isVatAdded = document.getElementById('addVat').checked;
+
+  // Hole punch group
+  document.getElementById('holePunchGroup').style.display = p.hasHoleOption ? '' : 'none';
+  if (p.hasHoleOption) {
+    const lbl = document.getElementById('holePunchLabel');
+    lbl.textContent = 'ต้องการเจาะรู' + (p.id === 'MUF' ? ' (บวกเพิ่ม 80 บ./ม้วน)' : '');
+  }
+
+  // Qty label & warnings
+  document.getElementById('qtyLabel').textContent = `จำนวน (${p.unit})`;
+  document.getElementById('bagWarning').style.display = p.id === 'BAG' ? '' : 'none';
+  const hdpeWarn = document.getElementById('hdpeWarning');
+  hdpeWarn.style.display = (p.id === 'HDPE' && state.inputType === 'catalog' && state.unitPrice === 0) ? '' : 'none';
+
+  // Custom size labels
+  const wUnit = p.id === 'BAG' ? 'นิ้ว' : 'เมตร';
+  const lUnit = p.id === 'BAG' ? 'นิ้ว' : 'เมตร';
+  document.getElementById('wLabel').textContent = `กว้าง (${wUnit})`;
+  document.getElementById('lLabel').textContent = `ยาว (${lUnit})`;
+
+  renderCart();
+  renderPreview();
+}
+
+function renderCart() {
+  const container = document.getElementById('cartContainer');
+  document.getElementById('cartCount').textContent = state.cart.length;
+  if (state.cart.length === 0) {
+    container.innerHTML = '<div class="cart-empty">ยังไม่มีสินค้าในรายการ</div>';
+    return;
+  }
+  container.innerHTML = '';
+  const list = document.createElement('div');
+  list.className = 'cart-list';
+  state.cart.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'cart-item';
+    const shipText = item.shippingCost === 'ปลายทาง' ? 'ปลายทาง' : item.shippingCost === 'ฟรี' ? 'ฟรี' : `${item.shippingCost} ฿`;
+    div.innerHTML = `
+      <div class="cart-item-info">
+        <div class="cart-item-name">${idx+1}. ${item.productNameText}</div>
+        <div class="cart-item-size">${item.sizeText}</div>
+        <div class="cart-item-price">
+          จำนวน: ${item.quantity} ${item.unit} | ราคา: ${item.baseItemTotal.toLocaleString()} ฿
+          ${item.discountPct > 0 ? `<span class="text-red"> (-${item.discountPct}%)</span>` : ''}
+          <span class="text-orange"> (ส่ง: ${shipText})</span>
+        </div>
+      </div>
+      <button class="btn-remove" onclick="handleRemoveFromCart(${item.id})">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>`;
+    list.appendChild(div);
+  });
+  container.appendChild(list);
+}
+
+function calcTotals() {
+  const cartTotalBeforeDiscount = state.cart.reduce((s, i) => s + i.baseItemTotal, 0);
+  const cartTotalDiscountAmount = state.cart.reduce((s, i) => s + i.discountAmount, 0);
+  const cartTotalShipping = state.cart.reduce((s, i) => s + (typeof i.shippingCost === 'number' ? i.shippingCost : 0), 0);
+  const cartProductNetTotal = state.cart.reduce((s, i) => s + i.netItemTotal, 0);
+
+  const gDiscountPctNum = Number(state.globalDiscountPct) || 0;
+  const globalDiscountPctAmount = Math.round(cartProductNetTotal * (gDiscountPctNum / 100));
+  const gDiscountBahtNum = Number(state.globalDiscountBaht) || 0;
+  const totalAfterDiscounts = cartProductNetTotal - globalDiscountPctAmount - gDiscountBahtNum;
+  const vatAmount = state.isVatAdded ? totalAfterDiscounts * 0.07 : 0;
+  const finalTotal = totalAfterDiscounts + vatAmount + cartTotalShipping;
+
+  return { cartTotalBeforeDiscount, cartTotalDiscountAmount, cartTotalShipping, cartProductNetTotal, gDiscountPctNum, globalDiscountPctAmount, gDiscountBahtNum, vatAmount, finalTotal };
+}
+
+function generateSummaryText() {
+  const { gDiscountPctNum, globalDiscountPctAmount, gDiscountBahtNum, vatAmount, finalTotal } = calcTotals();
+  let lines = [];
+  if (state.cart.length === 0) {
+    lines.push("📍 รายการ: (ยังไม่มีสินค้าในรายการ)");
+    lines.push("");
+  } else {
+    state.cart.forEach((item, idx) => {
+      lines.push(`📍 รายการที่ ${idx+1}:`);
+      lines.push(item.productNameText);
+      lines.push(item.sizeText);
+      lines.push(`จำนวน : ${item.quantity} ${item.unit}`);
+      if (item.optionsSurcharge > 0) lines.push(`ค่าเจาะรู : ${item.optionsSurcharge.toLocaleString()} บาท`);
+      lines.push(`ราคา : ${item.baseItemTotal.toLocaleString()} บาท`);
+      if (item.discountPct > 0) lines.push(`(หักส่วนลด ${item.discountPct}% : -${item.discountAmount.toLocaleString()} บาท)`);
+      let shipText = item.shippingCost === 'ปลายทาง' ? 'เก็บปลายทางโดยขนส่ง' : item.shippingCost === 'ฟรี' ? 'ส่งฟรี' : `${item.shippingCost.toLocaleString()} บาท`;
+      lines.push(`ค่าจัดส่ง : ${shipText}`);
+      lines.push('');
+    });
+  }
+  if (gDiscountPctNum > 0) lines.push(`(หักส่วนลดรวม ${gDiscountPctNum}% : -${globalDiscountPctAmount.toLocaleString()} บาท)`);
+  if (gDiscountBahtNum > 0) lines.push(`ส่วนลดพิเศษ : -${gDiscountBahtNum.toLocaleString()} บาท`);
+  if (state.isVatAdded) lines.push(`ภาษีมูลค่าเพิ่ม (VAT 7%) : ${formatCurrency(vatAmount)} บาท`);
+  if (gDiscountPctNum > 0 || gDiscountBahtNum > 0 || state.isVatAdded) lines.push('');
+
+  // Collect remarks
+  const validRemarks = state.remarks.filter(r => r.trim() !== '');
+  validRemarks.forEach((r, idx) => lines.push(`Remark${idx+1} : ${r}`));
+  if (validRemarks.length > 0) lines.push('');
+
+  lines.push(`ส่งที่อยู่จัดส่ง ...`);
+  const ci = document.getElementById('customerInfo').value;
+  if (ci) lines.push(ci);
+  lines.push('');
+  lines.push(`📌 สรุปยอดรวมทั้งหมด: ${formatCurrency(finalTotal)} บาท`);
+  return lines.join('\n');
+}
+
+function renderPreview() {
+  document.getElementById('previewBox').textContent = generateSummaryText();
+  const { cartTotalBeforeDiscount, cartTotalDiscountAmount, cartTotalShipping, gDiscountPctNum, globalDiscountPctAmount, gDiscountBahtNum, vatAmount, finalTotal } = calcTotals();
+  let html = `<div class="summary-row"><span>มูลค่าสินค้ารวม:</span><span>${cartTotalBeforeDiscount.toLocaleString()} ฿</span></div>`;
+  if (cartTotalDiscountAmount > 0) html += `<div class="summary-row discount"><span>ส่วนลดตามรายการรวม:</span><span>-${cartTotalDiscountAmount.toLocaleString()} ฿</span></div>`;
+  if (cartTotalShipping > 0) html += `<div class="summary-row shipping-col"><span>ค่าจัดส่งรวม:</span><span>${cartTotalShipping.toLocaleString()} ฿</span></div>`;
+  if (gDiscountPctNum > 0) html += `<div class="summary-row purple-col"><span>ส่วนลดรวมท้ายบิล (${gDiscountPctNum}%):</span><span>-${globalDiscountPctAmount.toLocaleString()} ฿</span></div>`;
+  if (gDiscountBahtNum > 0) html += `<div class="summary-row purple-col"><span>ส่วนลดพิเศษ (บาท):</span><span>-${gDiscountBahtNum.toLocaleString()} ฿</span></div>`;
+  if (state.isVatAdded) html += `<div class="summary-row purple-col"><span>ภาษีมูลค่าเพิ่ม (7%):</span><span>+${formatCurrency(vatAmount)} ฿</span></div>`;
+  html += `<div class="summary-row total"><span>ยอดสุทธิทั้งหมด:</span><span>${formatCurrency(finalTotal)} ฿</span></div>`;
+  document.getElementById('summaryNumbers').innerHTML = html;
+}
+
+// ===== CART ACTIONS =====
+function handleAddToCart() {
+  const p = currentProduct();
+  const qty = Number(document.getElementById('quantity').value) || 1;
+  const uPrice = Number(document.getElementById('unitPrice').value) || 0;
+  const isPunched = document.getElementById('isPunched').checked;
+  const discPct = Number(document.getElementById('itemDiscountPct').value) || 0;
+  const shipType = document.getElementById('shippingType').value;
+  const shipInput = document.getElementById('shippingCostInput').value;
+
+  let sizeText = '';
+  if (state.inputType === 'catalog') {
+    const sizes = availableSizes();
+    const item = sizes[state.selectedSizeIdx] || sizes[0];
+    const wU = item?.wUnit || 'เมตร';
+    const lU = item?.lUnit || 'เมตร';
+    sizeText = `กว้าง : ${item?.w || '-'} ${wU}\nยาว : ${item?.l || '-'} ${lU}\nหนา : ${item?.t || '-'} ${item?.tUnit || 'ไมครอน'}`;
+  } else {
+    const wU = p.id === 'BAG' ? 'นิ้ว' : 'เมตร';
+    const lU = p.id === 'BAG' ? 'นิ้ว' : 'เมตร';
+    const cw = document.getElementById('customW').value || '-';
+    const cl = document.getElementById('customL').value || '-';
+    const ct = document.getElementById('customT').value || '-';
+    const ctu = document.getElementById('customTUnit').value;
+    sizeText = `กว้าง : ${cw} ${wU}\nยาว : ${cl} ${lU}\nหนา : ${ct} ${ctu}`;
+  }
+
+  let optionsSurcharge = 0, optionsText = '';
+  if (p.hasHoleOption && isPunched) {
+    optionsText = '(แบบเจาะรู)';
+    if (p.id === 'MUF') optionsSurcharge = p.holePunchPrice * qty;
+  } else if (p.hasHoleOption && !isPunched) {
+    optionsText = '(แบบไม่เจาะรู)';
+  }
+
+  let productNameText = p.name;
+  if (p.hasFormulas) productNameText += ` ${state.formula}`;
+  if (optionsText) productNameText += ` ${optionsText}`;
+
+  const baseItemTotal = uPrice * qty + optionsSurcharge;
+  const discountAmount = Math.round(baseItemTotal * (discPct / 100));
+  const netItemTotal = baseItemTotal - discountAmount;
+
+  let shippingCostVal;
+  if (shipType === 'ปลายทาง') shippingCostVal = 'ปลายทาง';
+  else if (shipType === 'ฟรี') shippingCostVal = 'ฟรี';
+  else {
+    const n = Number(shipInput);
+    shippingCostVal = (isNaN(n) || shipInput === '') ? 0 : n;
+  }
+
+  const newItem = {
+    id: Date.now(), productNameText, sizeText, quantity: qty, unit: p.unit,
+    unitPrice: uPrice, optionsSurcharge, baseItemTotal, discountPct: discPct,
+    discountAmount, netItemTotal, shippingCost: shippingCostVal,
+    itemTotalWithShipping: netItemTotal + (typeof shippingCostVal === 'number' ? shippingCostVal : 0)
+  };
+
+  state.cart.push(newItem);
+  document.getElementById('itemDiscountPct').value = 0;
+  document.getElementById('shippingType').value = 'ปลายทาง';
+  document.getElementById('shippingCostInput').value = '';
+  document.getElementById('shippingCostInput').style.display = 'none';
+  state.shippingType = 'ปลายทาง';
+  renderCart();
+  renderPreview();
+}
+
+function handleRemoveFromCart(id) {
+  state.cart = state.cart.filter(i => i.id !== id);
+  renderCart();
+  renderPreview();
+}
+
+// ===== REMARKS =====
+function renderRemarks() {
+  const list = document.getElementById('remarksList');
+  list.innerHTML = '';
+  state.remarks.forEach((r, idx) => {
+    const row = document.createElement('div');
+    row.className = 'remark-row';
+    row.innerHTML = `
+      <span class="remark-label">Remark${idx+1}</span>
+      <input type="text" class="focus-teal" placeholder="ระบุหมายเหตุเพิ่มเติม (ถ้ามี)..." value="${r.replace(/"/g,'&quot;')}" oninput="handleRemarkChange(${idx},this.value)" />
+      ${state.remarks.length > 1 ? `<button class="btn-remove" onclick="handleRemoveRemark(${idx})"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>` : ''}
+    `;
+    list.appendChild(row);
+  });
+}
+function handleAddRemark() { state.remarks.push(''); renderRemarks(); }
+function handleRemarkChange(idx, val) { state.remarks[idx] = val; renderPreview(); }
+function handleRemoveRemark(idx) { state.remarks.splice(idx,1); renderRemarks(); renderPreview(); }
+
+// ===== COPY =====
+function handleCopy() {
+  const text = generateSummaryText();
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(showCopied).catch(() => fallbackCopy(text));
+  } else fallbackCopy(text);
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position='fixed'; ta.style.left='-9999px';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); showCopied(); } catch(e){}
+  document.body.removeChild(ta);
+}
+function showCopied() {
+  const btn = document.getElementById('copyBtn');
+  btn.textContent = '✓ คัดลอกแล้ว!'; btn.classList.add('copied');
+  setTimeout(() => { btn.innerHTML = `<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> คัดลอกข้อความ`; btn.classList.remove('copied'); }, 2000);
+}
+
+// ===== RESET =====
+function handleReset() {
+  if (!confirm('คุณต้องการล้างข้อมูลทั้งหมดเพื่อเริ่มบิลใหม่ใช่หรือไม่?')) return;
+  document.getElementById('customerInfo').value = '';
+  document.getElementById('productType').value = 'GHF';
+  document.getElementById('globalDiscountPct').value = '';
+  document.getElementById('globalDiscountBaht').value = '';
+  document.getElementById('addVat').checked = false;
+  document.getElementById('itemDiscountPct').value = 0;
+  document.getElementById('shippingType').value = 'ปลายทาง';
+  document.getElementById('shippingCostInput').value = '';
+  document.getElementById('shippingCostInput').style.display = 'none';
+  document.getElementById('isPunched').checked = false;
+  document.getElementById('customW').value = '';
+  document.getElementById('customL').value = '';
+  document.getElementById('customT').value = '';
+  document.getElementById('customTUnit').value = 'ไมครอน';
+  state = { ...state, productType:'GHF', formula:'สูตรมาตรฐาน', inputType:'catalog', selectedSizeIdx:0, unitPrice:0, quantity:1, isPunched:false, itemDiscountPct:0, shippingType:'ปลายทาง', shippingCostInput:'', globalDiscountPct:'', globalDiscountBaht:'', isVatAdded:false, remarks:[''], cart:[] };
+  setInputType('catalog');
+  updateFormulasDropdown();
+  updateSizeDropdown();
+  document.getElementById('quantity').value = 1;
+  renderRemarks();
+  render();
+}
+
+// Start
+init();
+</script>
+</body>
+</html>
